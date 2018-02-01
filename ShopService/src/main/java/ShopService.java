@@ -30,7 +30,7 @@ public class ShopService {
             Good goodInFile = dao.findByName(good.name);
 
             if (goodInFile == null || goodInFile.count < good.count) {
-                throw new IllegalArgumentException("Нету такого количесвта");
+                throw new IllegalArgumentException("Нету такого количества");
             } else {
                 Good newGood = new Good(goodInFile.name, goodInFile.count - good.count, good.price);
                 dao.deleteByName(good.name);
