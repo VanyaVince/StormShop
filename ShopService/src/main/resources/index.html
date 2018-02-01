@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="shop">
+<head>
+    <meta charset="UTF-8">
+    <title>Stormnet-Shop</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"></script>
+    <script>
+        angular.module('shop', [])
+            .controller('ShopController', function ($http) {
+                let app = this;
+                app.host = "http://localhost:4567";
+                app.goods = [];
+                app.cart = [];
+
+                app.loadGoods = function () {
+                    $http.get(app.host + "/getAll")
+                        .then(function (response) {
+                            app.goods = response.data;
+                        }, function (error) {
+                            console.error(error.data);
+                        });
+                };
+
+                app.loadCart = function () {
+                    let cart = JSON.parse(localStorage.getItem("cart"));
+                    if (Array.isArray(cart)) {
+                        app.cart = cart;
+                    }
+                };
+
+                app.addToCart = function (good) {
+                    let newGood = {name: good.name, count: 1, price: good.price};
+                    app.cart.push(newGood);
+                    localStorage.setItem("cart", JSON.stringify(app.cart));
+                };
+
+                app.increase = function (good) {
+                    good.count++;
+                    localStorage.setItem("cart", JSON.stringify(app.cart));
+                };
+
+                app.isGoodInCart = function (good) {
+                    return app.cart.find(it => it.name === good.name);
+                };
+
+                app.decrease = function (good) {
+                    good.count--;
+                    if (good.count <= 0) {
+                        app.cart = app.cart.filter(it => it.name !== good.name);
+                    }
+                    localStorage.setItem("cart", JSON.stringify(app.cart));
+                };
+
+                app.getTotalPrice = function () {
+                    let sum = 0;
+                    app.cart.forEach(it  => {
+                        sum += it.count * it.price;
+                    });
+                    return sum;
+                };
+                app.buyGoods = function () {
+                    $http.post(app.host + "/buyGoods", app.cart).then(
+                        function (response) {
+                            app.cart = [];
+                            localStorage.setItem("cart", JSON.stringify([]));
+                            alert("OK");
+                        },
+                        function (error) {
+                            console.error(error.data);
+                            alert("Something went wrong.");
+                        });
+                };
+
+                app.loadGoods();
+                app.loadCart();
+            });
+    </script>
+    <style>
+        .goods {
+            overflow: auto;
+        }
+
+        .goods .good {
+            height: 100px;
+            width: 100px;
+            margin-top: 5px;
+            margin-left: 5px;
+            display: block;
+            float: left;
+            background-color: chartreuse;
+        }
+
+        .cart {
+            overflow: auto;
+        }
+
+        .cart .good {
+            height: 100px;
+            width: 100px;
+            margin-top: 5px;
+            margin-left: 5px;
+            display: block;
+            float: left;
+            background-color: chartreuse;
+        }
+    </style>
+</head>
+<body>
+<div ng-controller="ShopController as app"
+     class="app">
+
+    <input type="text" ng-model="app.host">
+    <button ng-click="app.loadGoods()">Refresh page</button>
+
+    <div class="goods">
+        Goods:
+        <div>
+            <div ng-repeat="good in app.goods"
+                 class="good">
+                <div>
+                    {{good.name}}
+                </div>
+                <div>
+                    {{good.price}}$
+                </div>
+                <div ng-if="!app.isGoodInCart(good)">
+                    <button ng-click="app.addToCart(good)">Add to cart</button>
+                </div>
+                <div ng-if="app.isGoodInCart(good)">
+                    In cart.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cart" ng-show="app.cart.length > 0">
+        <div>
+            Cart:
+            <div>
+                <div ng-repeat="good in app.cart track by $index"
+                     class="good">
+                    <div>
+                        {{good.name}}
+                    </div>
+                    <div>
+                        Count: {{good.count}}
+                    </div>
+                    <div>
+                        <button ng-click="app.decrease(good)">-</button>
+                        <button ng-click="app.increase(good)">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="app.cart.length > 0">
+        <div>Total price: {{app.getTotalPrice()}}</div>
+        <button ng-click="app.buyGoods()">Buy</button>
+    </div>
+
+</div>
+</body>
+</html>
