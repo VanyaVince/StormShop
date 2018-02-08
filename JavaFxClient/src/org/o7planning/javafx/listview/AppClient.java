@@ -10,10 +10,8 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.o7planning.javafx.model.ConnectionHTTP;
 import org.o7planning.javafx.model.Good;
 import org.o7planning.javafx.model.Update;
@@ -31,7 +29,6 @@ public class AppClient extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
 
         //запрос getAll на добавление и приобретения товаров в магазин
         serverGoods = HTTP.getAll();
@@ -63,13 +60,6 @@ public class AppClient extends Application {
         ObservableList<Good> cartOfProduct = FXCollections.observableArrayList(new ArrayList<>());
         final TableView<Good> listCarts = new TableView<>(cartOfProduct);
 
-        Button deleteGood = new Button();
-        deleteGood.setText("x");
-
-        TableColumn<Good, String> deleteColumn = new TableColumn<Good, String>("");
-        deleteColumn.setCellValueFactory(new PropertyValueFactory<>("userName"));
-        deleteColumn.setMaxWidth(15);
-
         TableColumn<Good, String> cartTitleColumn = new TableColumn<Good, String>("Название");
         cartTitleColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().nameString()));
         cartTitleColumn.setMinWidth(150);
@@ -87,7 +77,7 @@ public class AppClient extends Application {
         listCarts.setMaxHeight(90);
 
         // добавление в колонны
-        listCarts.getColumns().addAll(deleteColumn, cartTitleColumn, cartQuantityColumn, cartPriceColumn);
+        listCarts.getColumns().addAll(cartTitleColumn, cartQuantityColumn, cartPriceColumn);
 
         //  кнопка добавления товара в корзину //
         Button addToCartButton = new Button();
@@ -195,7 +185,6 @@ public class AppClient extends Application {
             }
         });
         ////////////////////////////// добавить товар в магазин ///////////////////////////////////////
-        // запрос по getAll, для добавления товара в магазин
 
         //лист товаров
         ObservableList<Good> productCollection = FXCollections.observableArrayList(serverGoods);
@@ -258,7 +247,7 @@ public class AppClient extends Application {
                 }
             }
         });
-        ///////////// не работает ///////////////////
+        //обновление состояние листов
         Button buttonUpdateList = new Button();
         buttonUpdateList.setText("Обновить");
 
@@ -315,7 +304,6 @@ public class AppClient extends Application {
     public static void main(String[] args) throws Exception {
         launch(args);
     }
-
     private void windowAfterActBuy(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Information");
