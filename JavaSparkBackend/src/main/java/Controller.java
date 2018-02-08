@@ -35,8 +35,8 @@ public class Controller {
 
 
         get("/getAll", (request, response) -> {
-            String json = mapper.writeValueAsString(service.getAll());
-            return json;
+                String json = mapper.writeValueAsString(service.getAll());
+                return json;
         });
         post("/addGoods", (request, response) -> {
 

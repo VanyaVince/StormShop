@@ -17,12 +17,6 @@ public class ShopDao {
             List<Good> goods = mapper.readValue(fis, new TypeReference<List<Good>>() {
             });
             return goods;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (JsonParseException e) {
-            e.printStackTrace();
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
