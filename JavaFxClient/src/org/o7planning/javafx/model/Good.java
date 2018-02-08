@@ -35,7 +35,7 @@ public class Good {
 
     @Override
     public String toString() {
-        return "Name of product: " + this.name + ", количество: " + this.count + ", цена: " + this.price;
+        return "Name of product: " + this.name + ", count: " + this.count + ", price: " + this.price;
 
     }
 }

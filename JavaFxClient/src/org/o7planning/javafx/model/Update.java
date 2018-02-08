@@ -1,10 +1,7 @@
 package org.o7planning.javafx.model;
 
-import javafx.event.EventHandler;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
-import javafx.scene.input.MouseEvent;
-import org.o7planning.javafx.listview.AppClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,5 +42,4 @@ public class Update {
         }
         return null;
     }
-
 }

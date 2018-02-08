@@ -7,7 +7,6 @@ import javafx.event.EventHandler;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -24,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AppClient extends Application {
-    private static final ObjectMapper mapper = new ObjectMapper();
     private static final Update update = new Update();
     private static final ConnectionHTTP HTTP = new ConnectionHTTP();
 
@@ -33,7 +31,7 @@ public class AppClient extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Stage windowForAddGoods = new Stage();
+
 
         //запрос getAll на добавление и приобретения товаров в магазин
         serverGoods = HTTP.getAll();
@@ -65,7 +63,12 @@ public class AppClient extends Application {
         ObservableList<Good> cartOfProduct = FXCollections.observableArrayList(new ArrayList<>());
         final TableView<Good> listCarts = new TableView<>(cartOfProduct);
 
+        Button deleteGood = new Button();
+        deleteGood.setText("x");
 
+        TableColumn<Good, String> deleteColumn = new TableColumn<Good, String>("");
+        deleteColumn.setCellValueFactory(new PropertyValueFactory<>("userName"));
+        deleteColumn.setMaxWidth(15);
 
         TableColumn<Good, String> cartTitleColumn = new TableColumn<Good, String>("Название");
         cartTitleColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().nameString()));
@@ -84,7 +87,7 @@ public class AppClient extends Application {
         listCarts.setMaxHeight(90);
 
         // добавление в колонны
-        listCarts.getColumns().addAll(cartTitleColumn, cartQuantityColumn, cartPriceColumn);
+        listCarts.getColumns().addAll(deleteColumn, cartTitleColumn, cartQuantityColumn, cartPriceColumn);
 
         //  кнопка добавления товара в корзину //
         Button addToCartButton = new Button();
@@ -93,13 +96,11 @@ public class AppClient extends Application {
         addToCartButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                //System.out.println(listGood.getSelectionModel().getSelectedItem());
+
                 if (goodsInShop.getSelectionModel().getSelectedItem() == null) {
                     windowAfterActBuy("Не выбран товар для изменения количества");
 
                 } else {
-                    //    int quantity = Integer.parseInt(quantityInput.getText());
-                    //    GoodInCart good = new GoodInCart(goodsInShop.getSelectionModel().getSelectedItem(), quantity);
                     Good good = goodsInShop.getSelectionModel().getSelectedItem();
                     Good newGood = new Good(good.name, 1, good.price);
                     boolean flag = false;
@@ -148,11 +149,6 @@ public class AppClient extends Application {
                     windowAfterActBuy("Не выбран товар для изменения количества");
                     checkCount = true;
                 }
-//                if ((!checkCount) && listCarts.getSelectionModel().getSelectedItem().count == 0) {
-//                    cartOfProduct.remove(listCarts.getSelectionModel().getSelectedItem());
-//                    listCarts.getProperties().put(TableViewSkinBase.RECREATE, Boolean.TRUE);
-//                    checkCount = true;
-//                }
                 if (!checkCount) {
                     listCarts.getSelectionModel().getSelectedItem().count--;
                     listCarts.getProperties().put(TableViewSkinBase.RECREATE, Boolean.TRUE);
@@ -162,8 +158,6 @@ public class AppClient extends Application {
                     cartOfProduct.remove(listCarts.getSelectionModel().getSelectedItem());
                     update.totalSum(totalAmount, listCarts);
                 }
-                //listCarts.getColumns().get(1).setVisible(false);
-                //listCarts.getColumns().get(1).setVisible(true);
             }
         });
 
@@ -188,7 +182,7 @@ public class AppClient extends Application {
                 }
                 if (!check) {
                     try {
-                        HTTP.sendPost(productInCart);
+                        HTTP.sendPostBuy(productInCart);
                         windowAfterActBuy("Товар успешно приобретен");
                         cartOfProduct.removeAll(cartOfProduct);
                         update.afterBuyOfGoods(totalAmount);
@@ -258,7 +252,7 @@ public class AppClient extends Application {
                 List<Good> addProduct = new ArrayList<>();
                 addProduct.add(addGood);
                 try {
-                    HTTP.sendPost(addProduct);
+                    HTTP.sendPostAdd(addProduct);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -272,10 +266,8 @@ public class AppClient extends Application {
             @Override
             public void handle(ActionEvent event) {
                 try {
-                    serverGoods = HTTP.getAll();
-//                    ObservableList<Good> productCollection = FXCollections.observableArrayList(serverGoods);
-//                    final TableView<Good> viewGoodsInShop = new TableView<>(productCollection);
-                    viewGoodsInShop.getProperties().put(TableViewSkinBase.RECREATE, Boolean.TRUE);
+                    HTTP.updateOfGoods(productCollection, serverGoods);
+                    HTTP.updateOfGoods(goodsCollection, serverGoods);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -314,9 +306,10 @@ public class AppClient extends Application {
         primaryStage.setScene(new Scene(root, 400, 250));
         primaryStage.show();
         //окно для добавления товара в магазин
+        Stage windowForAddGoods = new Stage();
         windowForAddGoods.setTitle("AddGoods");
         windowForAddGoods.setScene(new Scene(root1, 400, 250));
-        //windowForAddGoods.show();
+        windowForAddGoods.show();
     }
 
     public static void main(String[] args) throws Exception {
@@ -326,10 +319,7 @@ public class AppClient extends Application {
     private void windowAfterActBuy(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Information");
-
-        // alert.setHeaderText("Results:");
         alert.setContentText(message);
-
         alert.showAndWait();
     }
 }

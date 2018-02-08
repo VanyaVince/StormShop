@@ -1,5 +1,6 @@
 package org.o7planning.javafx.model;
 
+import javafx.collections.ObservableList;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
@@ -18,10 +19,6 @@ public class ConnectionHTTP {
         return mapper.readValue(sendGet("http://localhost:4567/getAll"), new TypeReference<List<Good>>() {
         });
     }
-    public List<Good> updateGetAll(List<Good> list) throws Exception {
-        return mapper.readValue(sendGet("http://localhost:4567/getAll"), new TypeReference<List<Good>>() {
-        });
-    }
 
     public String sendGet(String url) throws Exception {
 
@@ -30,10 +27,6 @@ public class ConnectionHTTP {
 
         // optional default is GET
         con.setRequestMethod("GET");
-
-//        int responseCode = con.getResponseCode();
-//        System.out.println("\nSending 'GET' request to URL : " + url);
-//        System.out.println("Response Code : " + responseCode);
 
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
@@ -49,7 +42,35 @@ public class ConnectionHTTP {
     }
 
     //    // HTTP POST request
-    public void sendPost(List<Good> listOfGoods) throws Exception {
+    public void sendPostAdd(List<Good> listOfGoods) throws Exception {
+
+        String json = mapper.writeValueAsString(listOfGoods);
+
+        String url = "http://localhost:4567/addGoods";
+        URL obj = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+        //add reuqest header
+        con.setRequestMethod("POST");
+
+        // Send post request
+        con.setDoOutput(true);
+        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+        wr.writeBytes(json);
+        wr.flush();
+        wr.close();
+
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+    }
+    public void sendPostBuy(List<Good> listOfGoods) throws Exception {
 
         String json = mapper.writeValueAsString(listOfGoods);
 
@@ -76,5 +97,10 @@ public class ConnectionHTTP {
             response.append(inputLine);
         }
         in.close();
+    }
+    public void updateOfGoods(ObservableList list, List<Good> product) throws Exception {
+        list.removeAll(list);
+        product = getAll();
+        list.addAll(product);
     }
 }
