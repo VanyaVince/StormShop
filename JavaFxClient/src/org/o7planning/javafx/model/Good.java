@@ -1,5 +1,8 @@
 package org.o7planning.javafx.model;
 
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.control.Button;
+
 public class Good {
 
     public String name;
@@ -15,16 +18,17 @@ public class Good {
         this.price = price;
     }
 
-    public String nameString (){
+    public String nameString() {
 
         return this.name;
     }
-    public String priceString (){
+
+    public String priceString() {
 
         return Integer.toString(this.price);
     }
 
-    public String countString (){
+    public String countString() {
 
         return Integer.toString(this.count);
     }
@@ -36,7 +40,5 @@ public class Good {
     @Override
     public String toString() {
         return "Name of product: " + this.name + ", count: " + this.count + ", price: " + this.price;
-
     }
 }
-

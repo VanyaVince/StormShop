@@ -7,277 +7,173 @@ import javafx.event.EventHandler;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import org.o7planning.javafx.model.ConnectionHTTP;
-import org.o7planning.javafx.model.Good;
-import org.o7planning.javafx.model.Update;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.o7planning.javafx.model.*;
+import org.o7planning.javafx.service.ConnectionHTTP;
 
+import java.io.*;
 import java.util.ArrayList;
-
 import java.util.List;
+import java.util.Objects;
 
 public class AppClient extends Application {
-    private static final Update update = new Update();
-    private static final ConnectionHTTP HTTP = new ConnectionHTTP();
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final fromService update = new fromService();
+    private static final ConnectionHTTP http = new ConnectionHTTP();
     private Label totalAmount = new Label();
     private List<Good> serverGoods;
+
+    //    картинка java
+    private FileInputStream inputstream = new FileInputStream("C:\\java\\Java1.gif");
+    private Image image = new javafx.scene.image.Image(inputstream);
+    private ImageView javaImage = new ImageView(image);
+    public AppClient() throws FileNotFoundException {
+    }
+
+    //лист товаров при покупки
+    private ObservableList<Good> goodsCollection;
+    private TableView<Good> goodsInShop;
+
+    //лист товаров при добавлении товара
+    private TableView<Good> viewGoodsInShop;
+
+    //корзина
+    private ObservableList<Good> cartOfProduct = FXCollections.observableArrayList(new ArrayList<>());
+    private TableView<Good> listCarts = new TableView<>(cartOfProduct);
+
+    //имя товара при добавлении магазина
+    private TextField nameOfGoodAddToShop;
+    //количество продукта при добавлении товара в магазин
+    private TextField countOfGoodAddToShop;
+    //цена товара при добавлении в магазин
+    private TextField priceOfGoodAddToShop;
+    //авторизация логин
+    private TextField authorizationName;
+    //авторизация пароль
+    private PasswordField authorizationPassword;
+    //textFieldAccessToken
+
+    private Stage windowForAddGoods = new Stage();
+    private Stage authorization = new Stage();
 
     @Override
     public void start(Stage primaryStage) throws Exception {
 
         //запрос getAll на добавление и приобретения товаров в магазин
-        serverGoods = HTTP.getAll();
+        serverGoods = http.sendGet();
 
-        //лист товаров
-        ObservableList<Good> goodsCollection = FXCollections.observableArrayList(serverGoods);
-        final TableView<Good> goodsInShop = new TableView<>(goodsCollection);
-
-        TableColumn<Good, String> titleColumn = new TableColumn<Good, String>("Название");
-        titleColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().nameString()));
-        titleColumn.setMinWidth(200);
-
-        TableColumn<Good, String> priceColumn = new TableColumn<Good, String>("Цена");
-        priceColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().priceString()));
-        priceColumn.setMaxWidth(50);
-
-        //размер
-        goodsInShop.setMinWidth(250);
-        goodsInShop.setMaxHeight(90);
-
-        // добавление в колонны
-        goodsInShop.getColumns().addAll(titleColumn, priceColumn);
-
-        // количество товаров для добавления в корзину
-        TextField quantityInput = new TextField("1");
-        quantityInput.setMaxWidth(40);
+        //лист товаров в магазине
+        initializeListOfGoods();
 
         //корзина
-        ObservableList<Good> cartOfProduct = FXCollections.observableArrayList(new ArrayList<>());
-        final TableView<Good> listCarts = new TableView<>(cartOfProduct);
+        intializeListCart();
 
-        TableColumn<Good, String> cartTitleColumn = new TableColumn<Good, String>("Название");
-        cartTitleColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().nameString()));
-        cartTitleColumn.setMinWidth(150);
-
-        TableColumn<Good, String> cartQuantityColumn = new TableColumn<Good, String>("Количество");
-        cartQuantityColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().countString()));
-        cartQuantityColumn.setMaxWidth(50);
-
-        TableColumn<Good, String> cartPriceColumn = new TableColumn<Good, String>("Цена");
-        cartPriceColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().priceString()));
-        cartPriceColumn.setMaxWidth(50);
-
-        //размер
-        listCarts.setMaxWidth(282.5);
-        listCarts.setMaxHeight(90);
-
-        // добавление в колонны
-        listCarts.getColumns().addAll(cartTitleColumn, cartQuantityColumn, cartPriceColumn);
-
-        //  кнопка добавления товара в корзину //
+        //  кнопка добавления товара в корзину
         Button addToCartButton = new Button();
         addToCartButton.setText("Добавить товар в корзину");
+        addToCartButton.setOnAction(addGoodToCartEvent);
 
-        addToCartButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
+        //удалить товар из корзины
+        Button deleteGood = new Button();
+        deleteGood.setText("x");
+        deleteGood.setOnAction(deleteGoodToCartEvent);
 
-                if (goodsInShop.getSelectionModel().getSelectedItem() == null) {
-                    windowAfterActBuy("Не выбран товар для изменения количества");
-
-                } else {
-                    Good good = goodsInShop.getSelectionModel().getSelectedItem();
-                    Good newGood = new Good(good.name, 1, good.price);
-                    boolean flag = false;
-                    for (Good good1 : listCarts.getItems()) {
-                        if (good1.name == newGood.name) {
-                            good1.count++;
-                            update.totalSum(totalAmount, listCarts);
-                            listCarts.getProperties().put(TableViewSkinBase.RECREATE, Boolean.TRUE);
-                            flag = true;
-                        }
-                    }
-                    if (!flag) {
-                        cartOfProduct.add(newGood);
-                        update.totalSum(totalAmount, listCarts);
-                    }
-                }
-            }
-        });
         //увеличить количество товара в корзине
         Button buttonCountUp = new Button();
         buttonCountUp.setText("+");
-        buttonCountUp.setMinWidth(20);
+        buttonCountUp.setMinWidth(Proportions.BUTTON_UP);
+        buttonCountUp.setOnAction(upCountGoodToCartEvent);
 
-        buttonCountUp.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if (listCarts.getSelectionModel().getSelectedItem() == null) {
-                    windowAfterActBuy("Не выбран товар для изменения количества");
-                } else {
-                    listCarts.getSelectionModel().getSelectedItem().count++;
-                    update.totalSum(totalAmount, listCarts);
-                    listCarts.getProperties().put(TableViewSkinBase.RECREATE, Boolean.TRUE);
-                }
-            }
-        });
         // уменьшить количество товара в корзине
         Button buttonCountDown = new Button();
         buttonCountDown.setText("-");
-        buttonCountDown.setMinWidth(24);
+        buttonCountDown.setMinWidth(Proportions.BUTTON_DOWN);
+        buttonCountDown.setOnAction(downCountGoodToCartEvent);
 
-        buttonCountDown.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                boolean checkCount = false;
-                if (listCarts.getSelectionModel().getSelectedItem() == null) {
-                    windowAfterActBuy("Не выбран товар для изменения количества");
-                    checkCount = true;
-                }
-                if (!checkCount) {
-                    listCarts.getSelectionModel().getSelectedItem().count--;
-                    listCarts.getProperties().put(TableViewSkinBase.RECREATE, Boolean.TRUE);
-                    update.totalSum(totalAmount, listCarts);
-                }
-                if ((!checkCount) && listCarts.getSelectionModel().getSelectedItem().count == 0) {
-                    cartOfProduct.remove(listCarts.getSelectionModel().getSelectedItem());
-                    update.totalSum(totalAmount, listCarts);
-                }
-            }
-        });
-
-        // кнопка покупки //
+        // кнопка покупки
         Button buttonOfBuy = new Button();
         buttonOfBuy.setText("Купить товар");
+        buttonOfBuy.setOnAction(buyEvent);
 
-        buttonOfBuy.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                boolean check = false;
+        //обновить состояние
+        Button buttonUpdateListForAddGoods = new Button();
+        buttonUpdateListForAddGoods.setText("Обновить");
+        buttonUpdateListForAddGoods.setOnAction(updateEvent);
 
-                List<Good> productInShop = update.changeList(goodsInShop);
-                List<Good> productInCart = update.changeList(listCarts);
+        ///////////////////////////////////////////////// добавить товар в магазин ///////////////////////////////////////
 
-                for (Good goodInCart : productInCart) {
-                    Good good = update.findByName(productInShop, goodInCart.name);
-                    if (good.count < goodInCart.count) {
-                        check = true;
-                        break;
-                    }
-                }
-                if (!check) {
-                    try {
-                        HTTP.sendPostBuy(productInCart);
-                        windowAfterActBuy("Товар успешно приобретен");
-                        cartOfProduct.removeAll(cartOfProduct);
-                        update.afterBuyOfGoods(totalAmount);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    windowAfterActBuy("Нет такого количества");
-                }
-            }
-        });
-        ////////////////////////////// добавить товар в магазин ///////////////////////////////////////
+        initializeListOfGoodsAddGoods();
 
-        //лист товаров
-        ObservableList<Good> productCollection = FXCollections.observableArrayList(serverGoods);
-        final TableView<Good> viewGoodsInShop = new TableView<>(productCollection);
-
-        TableColumn<Good, String> titleColumn1 = new TableColumn<Good, String>("Название");
-        titleColumn1.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().nameString()));
-        titleColumn1.setMinWidth(130);
-
-        TableColumn<Good, String> countColumn2 = new TableColumn<Good, String>("Количество");
-        countColumn2.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().countString()));
-        countColumn2.setMaxWidth(50);
-
-        TableColumn<Good, String> priceColumn3 = new TableColumn<Good, String>("Цена");
-        priceColumn3.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().priceString()));
-        priceColumn3.setMaxWidth(50);
-
-        // добавление в колонны
-        viewGoodsInShop.getColumns().addAll(titleColumn1, countColumn2, priceColumn3);
-
-        viewGoodsInShop.setMaxWidth(250);
-        viewGoodsInShop.setMaxHeight(130);
-
-        //название текст окн, для добавления товара в магазин
+        //окна, для добавления товара в магазин
         Label lableNameOfGoods = new Label("Имя товара");
-        //lableNameOfGoods.setMinHeight(60);
         Label lableCountOfGoods = new Label("Количество");
-        //lableCountOfGoods.setMaxHeight(30);
         Label lablePriceOfGoods = new Label("Цена");
-        //lablePriceOfGoods.setMaxHeight(30);
 
         //имя продукта при добавления товара в магазин
-        TextField nameOfGoodAddToShop = new TextField("");
-        nameOfGoodAddToShop.setMaxWidth(90);
+        nameOfGoodAddToShop = new TextField();
+        nameOfGoodAddToShop.setMaxWidth(Proportions.TEXT_FIELS_ADD_GOOD_NAME);
         //количество продукта при добавлении товара в магазин
-        TextField countOfGoodAddToShop = new TextField("");
-        countOfGoodAddToShop.setMaxWidth(40);
+        countOfGoodAddToShop = new TextField();
+        countOfGoodAddToShop.setMaxWidth(Proportions.TEXT_FIELS_ADD_GOOD_COUNTandPRICE);
         //цена товара при добавлении в магазин
-        TextField priceOfGoodAddToShop = new TextField("");
-        priceOfGoodAddToShop.setMaxWidth(50);
+        priceOfGoodAddToShop = new TextField();
+        priceOfGoodAddToShop.setMaxWidth(Proportions.TEXT_FIELS_ADD_GOOD_COUNTandPRICE);
 
         //добавить товар в магазин
         Button buttonAddGoods = new Button();
         buttonAddGoods.setText("Добавить товар");
+        buttonAddGoods.setOnAction(addGoodEvent);
 
-        buttonAddGoods.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                String nameOfGood = nameOfGoodAddToShop.getText();
-                int countOfGood = Integer.parseInt(countOfGoodAddToShop.getText());
-                int priceOfGood = Integer.parseInt(priceOfGoodAddToShop.getText());
-
-                Good addGood = new Good(nameOfGood, countOfGood, priceOfGood);
-                List<Good> addProduct = new ArrayList<>();
-                addProduct.add(addGood);
-                try {
-                    HTTP.sendPostAdd(addProduct);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
         //обновление состояние листов
-        Button buttonUpdateList = new Button();
-        buttonUpdateList.setText("Обновить");
+        Button buttonUpdateListForBuyGoods = new Button();
+        buttonUpdateListForBuyGoods.setText("Обновить");
+        buttonUpdateListForBuyGoods.setOnAction(updateEvent);
 
-        buttonUpdateList.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                try {
-                    HTTP.updateOfGoods(productCollection, serverGoods);
-                    HTTP.updateOfGoods(goodsCollection, serverGoods);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        /////////////////////////////////////////////////////авторизация///////////////////////////////////////////////////
+        Label labelNickNameAndPassword = new Label("Введите ваш логин и пароль");
+        Label labelLogin = new Label("User_Name");
+        authorizationName = new TextField();
+        Label labelPassword = new Label("Password");
+        authorizationPassword = new PasswordField();
+        Button buttonEnter = new Button();
+        buttonEnter.setText("Login");
+        buttonEnter.setOnAction(authorizationEvent);
 
         ////////////////////////////// корневой узел getAll, addToCart, buy///////////////////////////////
         FlowPane root = new FlowPane();
         root.setPadding(new Insets(10));
-
+        root.setHgap(Proportions.ROOT_H_GAP);
+        root.setVgap(Proportions.ROOT_V_GAP);
         root.getChildren().add(goodsInShop);
+        root.getChildren().add(javaImage);
+        javaImage.setFitHeight(Proportions.IMAGE_HEIGHT);
+        javaImage.setFitWidth(Proportions.IMAGE_WIDTH);
+        root.getChildren().add(buttonUpdateListForBuyGoods);
         root.getChildren().add(addToCartButton);
         root.getChildren().add(listCarts);
         root.getChildren().add(buttonCountUp);
         root.getChildren().add(buttonCountDown);
+        root.getChildren().add(deleteGood);
         root.getChildren().add(totalAmount);
         root.getChildren().add(buttonOfBuy);
 
         ///////////////////////////////корневой узел addGoods///////////////////////////////////////
+
         FlowPane root1 = new FlowPane();
         root1.setPadding(new Insets(10));
+        root1.setVgap(Proportions.ROOT1_V_GAP);
+        root1.setHgap(Proportions.ROOT1_H_GAP);
+
         //ввод данных для добавления товара
         root1.getChildren().add(lableNameOfGoods);
         root1.getChildren().add(nameOfGoodAddToShop);
@@ -285,29 +181,290 @@ public class AppClient extends Application {
         root1.getChildren().add(countOfGoodAddToShop);
         root1.getChildren().add(lablePriceOfGoods);
         root1.getChildren().add(priceOfGoodAddToShop);
+
         //состояние в магазине, кнопка добавить товар, обновить
         root1.getChildren().add(viewGoodsInShop);
         root1.getChildren().add(buttonAddGoods);
-        root1.getChildren().add(buttonUpdateList);
+        root1.getChildren().add(buttonUpdateListForAddGoods);
 
-        //окно для добавления товара в магазин, покупка товара
+        /////////////////////////////корневой узел авторизации//////////////////////////////////////
+
+        GridPane root2 = new GridPane();
+        root2.setPadding(new Insets(10));
+        root2.setHgap(Proportions.ROOT2_H_GAP);
+        root2.setVgap(Proportions.ROOT2_V_GAP);
+        root2.add(labelNickNameAndPassword, 0, 0, 2, 1);
+        GridPane.setHalignment(labelNickNameAndPassword, HPos.CENTER);
+        root2.add(labelLogin, 0, 1);
+        root2.add(authorizationName, 1, 1);
+        root2.add(labelPassword, 0, 2);
+        root2.add(authorizationPassword, 1, 2);
+        root2.add(buttonEnter, 1, 3);
+        GridPane.setHalignment(buttonEnter, HPos.RIGHT);
+
+        //окно для добавления товара в корзину, покупка товара
         primaryStage.setTitle("Shop(Product)");
-        primaryStage.setScene(new Scene(root, 400, 250));
+        primaryStage.setScene(new Scene(root, 400, 255));
         primaryStage.show();
+
         //окно для добавления товара в магазин
-        Stage windowForAddGoods = new Stage();
         windowForAddGoods.setTitle("AddGoods");
-        windowForAddGoods.setScene(new Scene(root1, 400, 250));
-        windowForAddGoods.show();
+        windowForAddGoods.setScene(new Scene(root1, 400, 200));
+
+        //окно для регистрации
+        authorization.setTitle("Login_Password");
+        authorization.setScene(new Scene(root2, 325, 180));
+        authorization.show();
     }
 
-    public static void main(String[] args) throws Exception {
-        launch(args);
+    private void initializeListOfGoods() {
+
+        //лист товаров
+        goodsCollection = FXCollections.observableArrayList(serverGoods);
+        goodsInShop = new TableView<>(goodsCollection);
+
+        TableColumn<Good, String> titleColumn = new TableColumn<>("Название");
+        titleColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().nameString()));
+        titleColumn.setMinWidth(Proportions.COLUMN_WIDTH_NAME);
+
+        TableColumn<Good, String> QuantityColumn = new TableColumn<>("Количество");
+        QuantityColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().countString()));
+        QuantityColumn.setMaxWidth(Proportions.COLUMN_WIDTH_COUNTandPRICE);
+
+        TableColumn<Good, String> priceColumn = new TableColumn<>("Цена");
+        priceColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().priceString()));
+        priceColumn.setMaxWidth(Proportions.COLUMN_WIDTH_COUNTandPRICE);
+
+        //размер
+        goodsInShop.setMaxWidth(Proportions.LIST_GOODS_TO_BUY_WIDHT);
+        goodsInShop.setMaxHeight(Proportions.LIST_GOODS_TO_BUY_HEIGHT);
+
+        // добавление в колонн
+        goodsInShop.getColumns().addAll(titleColumn, QuantityColumn, priceColumn);
     }
-    private void windowAfterActBuy(String message) {
+
+    private void intializeListCart() {
+        TableColumn<Good, String> cartTitleColumn = new TableColumn<>("Название");
+        cartTitleColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().nameString()));
+        cartTitleColumn.setMinWidth(Proportions.COLUMN_WIDTH_NAME);
+
+        TableColumn<Good, String> cartQuantityColumn = new TableColumn<>("Количество");
+        cartQuantityColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().countString()));
+        cartQuantityColumn.setMaxWidth(Proportions.COLUMN_WIDTH_COUNTandPRICE);
+
+        TableColumn<Good, String> cartPriceColumn = new TableColumn<>("Цена");
+        cartPriceColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().priceString()));
+        cartPriceColumn.setMaxWidth(Proportions.COLUMN_WIDTH_COUNTandPRICE);
+
+        // добавление в колонн
+        listCarts.getColumns().addAll(cartTitleColumn, cartQuantityColumn, cartPriceColumn);
+
+        //размер
+        listCarts.setMaxWidth(Proportions.LIST_GOODS_TO_BUY_WIDHT);
+        listCarts.setMaxHeight(Proportions.LIST_GOODS_TO_BUY_HEIGHT);
+    }
+
+    private EventHandler<ActionEvent> addGoodToCartEvent = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+
+            if (goodsInShop.getSelectionModel().getSelectedItem() == null) {
+                windowInformation("Выберите товар");
+
+            } else {
+                Good good = goodsInShop.getSelectionModel().getSelectedItem();
+                Good newGood = new Good(good.name, 1, good.price);
+                boolean flag = false;
+                for (Good good1 : listCarts.getItems()) {
+                    if (Objects.equals(good1.name, newGood.name)) {
+                        good1.count++;
+                        update.totalSum(totalAmount, listCarts);
+                        listCarts.getProperties().put(TableViewSkinBase.RECREATE, Boolean.TRUE);
+                        flag = true;
+                    }
+                }
+                if (!flag) {
+                    cartOfProduct.add(newGood);
+                    update.totalSum(totalAmount, listCarts);
+                }
+            }
+        }
+    };
+
+    private EventHandler<ActionEvent> upCountGoodToCartEvent = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+            if (listCarts.getSelectionModel().getSelectedItem() == null) {
+                windowInformation("Не выбран товар для изменения количества");
+            } else {
+                listCarts.getSelectionModel().getSelectedItem().count++;
+                update.totalSum(totalAmount, listCarts);
+                listCarts.getProperties().put(TableViewSkinBase.RECREATE, Boolean.TRUE);
+            }
+        }
+    };
+
+    private EventHandler<ActionEvent> downCountGoodToCartEvent = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+            boolean checkCount = false;
+            if (listCarts.getSelectionModel().getSelectedItem() == null) {
+                windowInformation("Не выбран товар для изменения количества");
+                checkCount = true;
+            }
+            if (!checkCount) {
+                listCarts.getSelectionModel().getSelectedItem().count--;
+                listCarts.getProperties().put(TableViewSkinBase.RECREATE, Boolean.TRUE);
+                update.totalSum(totalAmount, listCarts);
+            }
+            if ((!checkCount) && listCarts.getSelectionModel().getSelectedItem().count == 0) {
+                cartOfProduct.remove(listCarts.getSelectionModel().getSelectedItem());
+                update.totalSum(totalAmount, listCarts);
+            }
+        }
+    };
+
+    private EventHandler<ActionEvent> deleteGoodToCartEvent = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+            if (listCarts.getSelectionModel().getSelectedItem() == null) {
+                cartOfProduct.removeAll(cartOfProduct);
+            } else {
+                int row = listCarts.getSelectionModel().getSelectedIndex();
+                listCarts.getItems().remove(row);
+                update.totalSum(totalAmount, listCarts);
+                listCarts.getProperties().put(TableViewSkinBase.RECREATE, Boolean.TRUE);
+            }
+        }
+    };
+
+    private EventHandler<ActionEvent> buyEvent = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+            boolean check = false;
+
+            List<Good> productInShop = update.changeList(goodsInShop);
+            List<Good> productInCart = update.changeList(listCarts);
+
+            if (cartOfProduct.isEmpty()) {
+                windowInformation("В корзине нет товара");
+                check = true;
+            }
+
+            for (Good goodInCart : productInCart) {
+                Good good = update.findByName(productInShop, goodInCart.name);
+                if (good.count < goodInCart.count) {
+                    check = true;
+                    windowInformation("Нет такого количества");
+                    try {
+                        update.updateOfGoods(goodsCollection, productInShop);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+            }
+
+            if (!check) {
+                try {
+                    String json = mapper.writeValueAsString(productInCart);
+                    http.sendPost("http://localhost:4567/buyGoods", json, http.accessToken);
+                    windowInformation("Товар успешно приобретен");
+                    cartOfProduct.removeAll(cartOfProduct);
+                    update.afterBuyOfGoods(totalAmount);
+                    update.updateOfGoods(goodsCollection, productInShop);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private void initializeListOfGoodsAddGoods() {
+
+        //лист товаров
+        viewGoodsInShop = new TableView<>(goodsCollection);
+
+        TableColumn<Good, String> titleColumn1 = new TableColumn<Good, String>("Название");
+        titleColumn1.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().nameString()));
+        titleColumn1.setMinWidth(Proportions.COLUMN_WIDTH_NAME);
+
+        TableColumn<Good, String> countColumn2 = new TableColumn<Good, String>("Количество");
+        countColumn2.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().countString()));
+        countColumn2.setMaxWidth(Proportions.COLUMN_WIDTH_COUNTandPRICE);
+
+        TableColumn<Good, String> priceColumn3 = new TableColumn<Good, String>("Цена");
+        priceColumn3.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().priceString()));
+        priceColumn3.setMaxWidth(Proportions.COLUMN_WIDTH_COUNTandPRICE);
+
+        // добавление в колонны
+        viewGoodsInShop.getColumns().addAll(titleColumn1, countColumn2, priceColumn3);
+
+        viewGoodsInShop.setMaxWidth(Proportions.LIST_GOODS_TO_ADD_WIDHT);
+        viewGoodsInShop.setMaxHeight(Proportions.LIST_GOODS_TO_ADD_HEIGHT);
+    }
+
+    private EventHandler<ActionEvent> addGoodEvent = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+
+            String nameOfGood = nameOfGoodAddToShop.getText();
+            int countOfGood = Integer.parseInt(countOfGoodAddToShop.getText());
+            int priceOfGood = Integer.parseInt(priceOfGoodAddToShop.getText());
+
+            Good addGood = new Good(nameOfGood, countOfGood, priceOfGood);
+
+            List<Good> addProduct = new ArrayList<>();
+            addProduct.add(addGood);
+
+            try {
+                String json = mapper.writeValueAsString(addProduct);
+                http.sendPost("http://localhost:4567/addGoods", json, http.accessToken);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private EventHandler<ActionEvent> updateEvent = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+            try {
+                update.updateOfGoods(goodsCollection, serverGoods);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private EventHandler<ActionEvent> authorizationEvent = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+            String nameAccount = authorizationName.getText();
+            String passwordAccount = authorizationPassword.getText();
+            Account account = new Account(nameAccount, passwordAccount);
+
+            try {
+                String json = mapper.writeValueAsString(account);
+                http.sendPost("http://localhost:4567/authorization", json, http.accessToken);
+            } catch (IOException e) {
+                windowInformation("Неверный логин или пароль");
+            }
+            if (!(http.accessToken == null)) {
+                authorization.close();
+                windowForAddGoods.show();
+            }
+        }
+    };
+
+    public void windowInformation(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Information");
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public static void main(String[] args) throws Exception {
+        launch(args);
     }
 }
