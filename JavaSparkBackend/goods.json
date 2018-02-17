@@ -1,1 +1,33 @@
-[{"name":"Pineapple","count":15,"price":6},{"name":"Orange","count":17,"price":1},{"name":"Apple","count":41,"price":2},{"name":"Bannana","count":10,"price":4},{"name":"Fish","count":8,"price":4}]
+[ {
+  "name" : "Applea",
+  "count" : 5,
+  "price" : 8
+}, {
+  "name" : "Apple",
+  "count" : 1,
+  "price" : 5
+}, {
+  "name" : "Milk",
+  "count" : 1,
+  "price" : 3
+}, {
+  "name" : "Bannana",
+  "count" : 2,
+  "price" : 4
+}, {
+  "name" : "Pineapple",
+  "count" : 1,
+  "price" : 10
+}, {
+  "name" : "Fish",
+  "count" : 1,
+  "price" : 1
+}, {
+  "name" : "Orange",
+  "count" : 20,
+  "price" : 6
+}, {
+  "name" : "French-fries",
+  "count" : 1,
+  "price" : 2
+} ]

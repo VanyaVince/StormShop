@@ -37,7 +37,7 @@ public class ShopDao {
         List<Good> goods = findAll();
         goods.add(good);
 
-        String listOfGoods = mapper.writeValueAsString(goods);
+        String listOfGoods = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(goods);
         FileOutputStream fos = new FileOutputStream("goods.json");//открытие потока, для чтения файла.
         fos.write(listOfGoods.getBytes());
         fos.flush();
@@ -52,14 +52,35 @@ public class ShopDao {
             if (el.name.equals(name))
                 it.remove();
         }
-        String listOfGoods = mapper.writeValueAsString(goods);
+        String listOfGoods = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(goods);
         FileOutputStream fos = new FileOutputStream("goods.json");//открытие потока, для чтения файла.
         fos.write(listOfGoods.getBytes());
         fos.flush();
         fos.close();
     }
-}
 
+    public List<Account> findAccount() {
+        try {
+            FileInputStream fis = new FileInputStream("account.json");// открытие потока, для чтения файла goods.json
+            List<Account> account = mapper.readValue(fis, new TypeReference<List<Account>>() {
+            });
+            return account;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Account findLogin(String name) {
+        List<Account> clientList = findAccount();
+        for (Account client : clientList) {
+            if (client.getName().equals(name)) {
+                return client;
+            }
+        }
+        return null;
+    }
+}
 //    public void deleteByName(String name) {
 //        goods.stream()
 //                .filter(it -> Objects.equals(it.getId(), name))

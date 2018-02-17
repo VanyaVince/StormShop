@@ -33,23 +33,22 @@ public class Controller {
         });
         before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
 
-
         get("/getAll", (request, response) -> {
-                String json = mapper.writeValueAsString(service.getAll());
-                return json;
+            String json = mapper.writeValueAsString(service.getAll());
+            return json;
         });
         post("/addGoods", (request, response) -> {
 
             try {
                 String body = request.body();
+                String access_token = request.headers("Header");
                 List<Good> goods = mapper.readValue(body, new TypeReference<List<Good>>() {
                 });
-                service.addGoods(goods);
+                service.addGoods(goods, access_token);
                 return "ok";
             } catch (JsonParseException | JsonMappingException e) {
                 LOGGER.error(e.getMessage(), e);
             }
-
             return "error";
         });
         post("/buyGoods", (request, response) -> {
@@ -63,7 +62,21 @@ public class Controller {
             } catch (JsonParseException | JsonMappingException e) {
                 e.printStackTrace();
             }
+            return "error";
+        });
 
+        post("/authorization", (request, response) -> {
+
+            try {
+                String body = request.body();
+                Account login_Password = mapper.readValue(body, Account.class);
+                {
+                }
+                return  service.checkAccount(login_Password);
+
+            } catch (JsonParseException | JsonMappingException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
             return "error";
         });
     }
