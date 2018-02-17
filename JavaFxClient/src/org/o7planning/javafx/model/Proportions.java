@@ -19,6 +19,11 @@ public class Proportions {
     public static int ROOT1_V_GAP = 4;
     public static int ROOT2_H_GAP = 25;
     public static int ROOT2_V_GAP = 15;
-
-
+    public static int SCENE_BUY_GOODS_WIDHT = 400;
+    public static int SCENE_BUY_GOODS_HEIGHT = 255;
+    public static int SCENE_ADD_GOODS_WIDHT = 400;
+    public static int SCENE_ADD_GOODS_HEIGHT = 200;
+    public static int SCENE_LOGIN_GOODS_WIDHT = 325;
+    public static int SCENE_LOGIN_GOODS_HEIGHT = 180;
+    public static int PADDING = 10;
 }

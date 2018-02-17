@@ -151,7 +151,7 @@ public class AppClient extends Application {
 
         ////////////////////////////// корневой узел getAll, addToCart, buy///////////////////////////////
         FlowPane root = new FlowPane();
-        root.setPadding(new Insets(10));
+        root.setPadding(new Insets(Proportions.PADDING));
         root.setHgap(Proportions.ROOT_H_GAP);
         root.setVgap(Proportions.ROOT_V_GAP);
         root.getChildren().add(goodsInShop);
@@ -170,7 +170,7 @@ public class AppClient extends Application {
         ///////////////////////////////корневой узел addGoods///////////////////////////////////////
 
         FlowPane root1 = new FlowPane();
-        root1.setPadding(new Insets(10));
+        root1.setPadding(new Insets(Proportions.PADDING));
         root1.setVgap(Proportions.ROOT1_V_GAP);
         root1.setHgap(Proportions.ROOT1_H_GAP);
 
@@ -190,7 +190,7 @@ public class AppClient extends Application {
         /////////////////////////////корневой узел авторизации//////////////////////////////////////
 
         GridPane root2 = new GridPane();
-        root2.setPadding(new Insets(10));
+        root2.setPadding(new Insets(Proportions.PADDING));
         root2.setHgap(Proportions.ROOT2_H_GAP);
         root2.setVgap(Proportions.ROOT2_V_GAP);
         root2.add(labelNickNameAndPassword, 0, 0, 2, 1);
@@ -204,16 +204,16 @@ public class AppClient extends Application {
 
         //окно для добавления товара в корзину, покупка товара
         primaryStage.setTitle("Shop(Product)");
-        primaryStage.setScene(new Scene(root, 400, 255));
+        primaryStage.setScene(new Scene(root, Proportions.SCENE_BUY_GOODS_WIDHT, Proportions.SCENE_BUY_GOODS_HEIGHT));
         primaryStage.show();
 
         //окно для добавления товара в магазин
         windowForAddGoods.setTitle("AddGoods");
-        windowForAddGoods.setScene(new Scene(root1, 400, 200));
+        windowForAddGoods.setScene(new Scene(root1, Proportions.SCENE_ADD_GOODS_WIDHT, Proportions.SCENE_ADD_GOODS_HEIGHT));
 
         //окно для регистрации
         authorization.setTitle("Login_Password");
-        authorization.setScene(new Scene(root2, 325, 180));
+        authorization.setScene(new Scene(root2, Proportions.SCENE_LOGIN_GOODS_WIDHT, Proportions.SCENE_LOGIN_GOODS_HEIGHT));
         authorization.show();
     }
 
