@@ -37,6 +37,7 @@ public class AppClient extends Application {
     private FileInputStream inputstream = new FileInputStream("C:\\java\\Java1.gif");
     private Image image = new javafx.scene.image.Image(inputstream);
     private ImageView javaImage = new ImageView(image);
+
     public AppClient() throws FileNotFoundException {
     }
 
@@ -373,8 +374,14 @@ public class AppClient extends Application {
                     cartOfProduct.removeAll(cartOfProduct);
                     update.afterBuyOfGoods(totalAmount);
                     update.updateOfGoods(goodsCollection, productInShop);
+
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    windowInformation("Нет такого количества");
+                }
+                try {
+                    update.updateOfGoods(goodsCollection, productInShop);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                 }
             }
         }
@@ -440,6 +447,7 @@ public class AppClient extends Application {
     private EventHandler<ActionEvent> authorizationEvent = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
+            boolean check = true;
             String nameAccount = authorizationName.getText();
             String passwordAccount = authorizationPassword.getText();
             Account account = new Account(nameAccount, passwordAccount);
@@ -449,8 +457,9 @@ public class AppClient extends Application {
                 http.sendPost("http://localhost:4567/authorization", json, http.accessToken);
             } catch (IOException e) {
                 windowInformation("Неверный логин или пароль");
+                check = false;
             }
-            if (!(http.accessToken == null)) {
+            if (check) {
                 authorization.close();
                 windowForAddGoods.show();
             }

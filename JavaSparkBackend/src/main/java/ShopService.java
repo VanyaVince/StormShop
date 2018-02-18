@@ -16,8 +16,8 @@ public class ShopService {
         return dao.findAll();
     }
 
-    public void addGoods(List<Good> goods, String access) throws IOException {
-
+    public String addGoods(List<Good> goods, String access) throws IOException {
+        boolean check = false;
         for (String accessToken : access_token) {
             if (Objects.equals(access, accessToken)) {
                 for (Good good : goods) {
@@ -30,14 +30,18 @@ public class ShopService {
                         Good newGood = new Good(goodInFile.name, goodInFile.count + good.count, good.price);
                         dao.save(newGood);
                     }
+                    return accessToken;
                 }
-            } else {
-                throw new IllegalArgumentException("access_Token не совпал");
+                check = true;
             }
         }
+        if (!check) {
+            throw new IllegalArgumentException("access_Token не совпал");
+        }
+        return "";
     }
 
-    public void buyGoods(List<Good> goods) throws IOException {
+    public String buyGoods(List<Good> goods, String access_token) throws IOException {
         for (Good good : goods) {
             Good goodInFile = dao.findByName(good.name);
 
@@ -49,6 +53,8 @@ public class ShopService {
                 dao.save(newGood);
             }
         }
+
+        return access_token;
     }
 
     public String checkAccount(Account loginPaswword) throws IOException {

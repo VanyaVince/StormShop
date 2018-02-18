@@ -41,7 +41,7 @@ public class ConnectionHTTP {
     }
 
     // HTTP POST request
-    public void sendPost(String url, String json, String access_Token) throws IOException {
+    public synchronized void sendPost(String url, String json, String access_Token) throws IOException {
 
         //String json = mapper.writeValueAsString(listOfGoods);
 
