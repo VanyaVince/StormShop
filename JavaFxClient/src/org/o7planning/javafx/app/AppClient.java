@@ -81,11 +81,6 @@ public class AppClient extends Application {
     private GridPane rootAuthorization = new GridPane();
     private FlowPane rootUrlConnection = new FlowPane();
 
-    //    картинка java
-//    private FileInputStream inputstream = new FileInputStream("C:\\java\\Java1.gif");
-//    private Image image = new javafx.scene.image.Image(inputstream);
-//    private ImageView javaImage = new ImageView(image);
-
     public AppClient() throws FileNotFoundException {
     }
 

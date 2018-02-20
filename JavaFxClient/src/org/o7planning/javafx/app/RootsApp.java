@@ -14,9 +14,6 @@ public class RootsApp {
         root.setHgap(ProportionsConfigs.ROOT_H_GAP);
         root.setVgap(ProportionsConfigs.ROOT_V_GAP);
         root.getChildren().add(AppClient.goodsInShop);
-//        root.getChildren().add(javaImage);
-//        AppClient.javaImage.setFitHeight(ProportionsConfigs.IMAGE_HEIGHT);
-//        javaImage.setFitWidth(ProportionsConfigs.IMAGE_WIDTH);
         root.getChildren().add(AppClient.buttonUpdateListForBuyGoods);
         root.getChildren().add(AppClient.addToCartButton);
         root.getChildren().add(AppClient.listCarts);
