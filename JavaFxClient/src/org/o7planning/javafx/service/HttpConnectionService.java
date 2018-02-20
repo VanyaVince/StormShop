@@ -12,14 +12,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
-public class ConnectionHTTP {
+public class HttpConnectionService {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     public String accessToken = "";
+    public static String urlConnection = "";
 
     public List<Good> sendGet() throws IOException {
 
-        String url =  "http://localhost:4567/getAll";
+        String url =  urlConnection.concat("getAll");
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 

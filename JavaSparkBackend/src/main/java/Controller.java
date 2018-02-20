@@ -41,10 +41,10 @@ public class Controller {
 
             try {
                 String body = request.body();
-                String access_token = request.headers("Header");
+                String accessToken = request.headers("Header");
                 List<Good> goods = mapper.readValue(body, new TypeReference<List<Good>>() {
                 });
-                return service.addGoods(goods, access_token);
+                return service.addGoods(goods, accessToken);
 
             } catch (JsonParseException | JsonMappingException e) {
                 LOGGER.error(e.getMessage(), e);
@@ -55,13 +55,13 @@ public class Controller {
 
             try {
                 String body = request.body();
-                String access_token = request.headers("Header");
+                String accessToken = request.headers("Header");
                 List<Good> goods = mapper.readValue(body, new TypeReference<List<Good>>() {
                 });
-                return service.buyGoods(goods, access_token);
+                return service.buyGoods(goods, accessToken);
 
             } catch (JsonParseException | JsonMappingException e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
             }
             return "error";
         });

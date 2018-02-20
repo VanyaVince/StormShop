@@ -10,7 +10,7 @@ import java.util.List;
 public class ShopDao {
     private static final ObjectMapper mapper = new ObjectMapper();//преобразует файлы.
 
-    public List<Good> findAll() {
+    public synchronized List<Good> findAll() {
         try {
             FileInputStream fis = new FileInputStream("goods.json");// открытие потока, для чтения файла goods.json
 
@@ -23,7 +23,7 @@ public class ShopDao {
         return null;
     }
 
-    public Good findByName(String name) {
+    public synchronized Good findByName(String name) {
         List<Good> goods = findAll();
         for (Good good : goods) {
             if (good.name.equals(name)) {
@@ -33,7 +33,7 @@ public class ShopDao {
         return null;
     }
 
-    public void save(Good good) throws IOException {
+    public synchronized void save(Good good) throws IOException {
         List<Good> goods = findAll();
         goods.add(good);
 
@@ -44,7 +44,7 @@ public class ShopDao {
         fos.close();//закрытие потока
     }
 
-    public void deleteByName(String name) throws IOException {
+    public synchronized void deleteByName(String name) throws IOException {
         List<Good> goods = findAll();
         Iterator<Good> it = goods.iterator();
         while (it.hasNext()) {
@@ -59,7 +59,7 @@ public class ShopDao {
         fos.close();
     }
 
-    public List<Account> findAccount() {
+    public synchronized List<Account> findAccount() {
         try {
             FileInputStream fis = new FileInputStream("account.json");// открытие потока, для чтения файла goods.json
             List<Account> account = mapper.readValue(fis, new TypeReference<List<Account>>() {
@@ -71,7 +71,7 @@ public class ShopDao {
         return null;
     }
 
-    public Account findLogin(String name) {
+    public synchronized Account findLogin(String name) {
         List<Account> clientList = findAccount();
         for (Account client : clientList) {
             if (client.getName().equals(name)) {

@@ -8,7 +8,7 @@ import java.util.Random;
 
 public class ShopService {
     private Random random = new Random();
-    private List<String> access_token = new ArrayList<>();
+    private List<String> accessT = new ArrayList<>();
 
     private ShopDao dao = new ShopDao();
 
@@ -18,7 +18,7 @@ public class ShopService {
 
     public String addGoods(List<Good> goods, String access) throws IOException {
         boolean check = false;
-        for (String accessToken : access_token) {
+        for (String accessToken : accessT) {
             if (Objects.equals(access, accessToken)) {
                 for (Good good : goods) {
                     Good goodInFile = dao.findByName(good.name);
@@ -68,15 +68,15 @@ public class ShopService {
             String randomNumbers = (String.valueOf(random.doubles()));
             String passordWithRandom = loginPaswword.getPassword().concat(randomNumbers);
             accessToken = DigestUtils.sha1Hex(passordWithRandom);
-            access_token.add(accessToken);
+            accessT.add(accessToken);
 
             return accessToken;
             /*
             SHA1 shifr = new shifr();
             String random = (string)(Math.random);
             String input = pass.concat(random);
-            String access_token = shifr.coding(input);
-            return access_token;
+            String accessT = shifr.coding(input);
+            return accessT;
              */
         } else {
             throw new IllegalArgumentException("Неверный логин или пароль.");

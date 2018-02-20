@@ -1,16 +1,17 @@
-package org.o7planning.javafx.model;
+package org.o7planning.javafx.app;
 
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
-import org.o7planning.javafx.service.ConnectionHTTP;
+import org.o7planning.javafx.model.Good;
+import org.o7planning.javafx.service.HttpConnectionService;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class fromService {
-    private static final ConnectionHTTP HTTP = new ConnectionHTTP();
+public class AppService {
+    private static final HttpConnectionService HTTP = new HttpConnectionService();
 
     public void totalSum(Label viewSum, TableView list) {
         List<Good> product = changeList(list);
