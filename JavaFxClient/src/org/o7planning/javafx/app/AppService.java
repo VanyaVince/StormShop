@@ -50,9 +50,8 @@ public class AppService {
         return null;
     }
 
-    public void updateOfGoods(ObservableList list, List<Good> product) throws IOException {
-        list.removeAll(list);
-        product = HTTP.sendGet();
-        list.addAll(product);
+    public void updateOfGoods(ObservableList list) throws IOException {
+        list.clear();
+        list.addAll(AppClient.getServerGoods());
     }
 }

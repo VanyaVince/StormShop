@@ -20,7 +20,7 @@ public class HttpConnectionService {
 
     public List<Good> sendGet() throws IOException {
 
-        String url =  urlConnection.concat("getAll");
+        String url = urlConnection.concat("/getAll");
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
@@ -42,7 +42,7 @@ public class HttpConnectionService {
     }
 
     // HTTP POST request
-    public synchronized void sendPost(String url, String json, String access_Token) throws IOException {
+    public void sendPost(String url, String json, String access_Token) throws IOException {
 
         //String json = mapper.writeValueAsString(listOfGoods);
 
