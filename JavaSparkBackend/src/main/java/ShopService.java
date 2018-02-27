@@ -71,13 +71,7 @@ public class ShopService {
             accessT.add(accessToken);
 
             return accessToken;
-            /*
-            SHA1 shifr = new shifr();
-            String random = (string)(Math.random);
-            String input = pass.concat(random);
-            String accessT = shifr.coding(input);
-            return accessT;
-             */
+
         } else {
             throw new IllegalArgumentException("Неверный логин или пароль.");
         }

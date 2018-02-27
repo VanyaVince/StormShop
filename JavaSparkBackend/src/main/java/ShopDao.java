@@ -1,14 +1,16 @@
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.Iterator;
 import java.util.List;
 
+
 public class ShopDao {
     private static final ObjectMapper mapper = new ObjectMapper();//преобразует файлы.
+    private static final Logger LOGGER = LoggerFactory.getLogger(Controller.class);
 
     public synchronized List<Good> findAll() {
         try {
@@ -18,7 +20,7 @@ public class ShopDao {
             });
             return goods;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
         return null;
     }
@@ -66,7 +68,7 @@ public class ShopDao {
             });
             return account;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
         return null;
     }
@@ -81,9 +83,3 @@ public class ShopDao {
         return null;
     }
 }
-//    public void deleteByName(String name) {
-//        goods.stream()
-//                .filter(it -> Objects.equals(it.getId(), name))
-//                .findFirst()
-//                .ifPresent(it -> goods.remove(it));
-//    }

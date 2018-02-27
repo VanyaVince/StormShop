@@ -49,6 +49,7 @@ public class Controller {
             } catch (JsonParseException | JsonMappingException e) {
                 LOGGER.error(e.getMessage(), e);
             }
+            response.status(400);
             return "error";
         });
         post("/buyGoods", (request, response) -> {
@@ -63,6 +64,7 @@ public class Controller {
             } catch (JsonParseException | JsonMappingException e) {
                 LOGGER.error(e.getMessage(), e);
             }
+            response.status(400);
             return "error";
         });
 
@@ -73,11 +75,12 @@ public class Controller {
                 Account login_Password = mapper.readValue(body, Account.class);
                 {
                 }
-                return  service.checkAccount(login_Password);
+                return service.checkAccount(login_Password);
 
             } catch (JsonParseException | JsonMappingException e) {
                 LOGGER.error(e.getMessage(), e);
             }
+            response.status(400);
             return "error";
         });
     }
