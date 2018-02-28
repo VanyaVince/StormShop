@@ -32,5 +32,4 @@ public class AccountDao {
         }
         return null;
     }
-
 }
