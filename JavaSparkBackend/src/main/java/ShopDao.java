@@ -60,26 +60,4 @@ public class ShopDao {
         fos.flush();
         fos.close();
     }
-
-    public synchronized List<Account> findAccount() {
-        try {
-            FileInputStream fis = new FileInputStream("account.json");// открытие потока, для чтения файла goods.json
-            List<Account> account = mapper.readValue(fis, new TypeReference<List<Account>>() {
-            });
-            return account;
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    public synchronized Account findLogin(String name) {
-        List<Account> clientList = findAccount();
-        for (Account client : clientList) {
-            if (client.getName().equals(name)) {
-                return client;
-            }
-        }
-        return null;
-    }
 }

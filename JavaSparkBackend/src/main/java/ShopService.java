@@ -1,34 +1,30 @@
-import org.apache.commons.codec.digest.DigestUtils;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 public class ShopService {
-    private Random random = new Random();
-    private List<String> accessT = new ArrayList<>();
 
-    private ShopDao dao = new ShopDao();
+    private ShopDao daoShop = new ShopDao();
+    private AccountService accountService = new AccountService();
 
     public List<Good> getAll() {
-        return dao.findAll();
+        return daoShop.findAll();
     }
 
     public String addGoods(List<Good> goods, String access) throws IOException {
         boolean check = false;
+        List<String> accessT = accountService.list();
         for (String accessToken : accessT) {
             if (Objects.equals(access, accessToken)) {
                 for (Good good : goods) {
-                    Good goodInFile = dao.findByName(good.name);
+                    Good goodInFile = daoShop.findByName(good.name);
 
                     if (goodInFile == null) {
-                        dao.save(good);
+                        daoShop.save(good);
                     } else {
-                        dao.deleteByName(good.name);
+                        daoShop.deleteByName(good.name);
                         Good newGood = new Good(goodInFile.name, goodInFile.count + good.count, good.price);
-                        dao.save(newGood);
+                        daoShop.save(newGood);
                     }
                     return accessToken;
                 }
@@ -43,37 +39,16 @@ public class ShopService {
 
     public String buyGoods(List<Good> goods, String access_token) throws IOException {
         for (Good good : goods) {
-            Good goodInFile = dao.findByName(good.name);
+            Good goodInFile = daoShop.findByName(good.name);
 
             if (goodInFile == null || goodInFile.count < good.count) {
                 throw new IllegalArgumentException("Нету такого количества.");
             } else {
                 Good newGood = new Good(goodInFile.name, goodInFile.count - good.count, good.price);
-                dao.deleteByName(good.name);
-                dao.save(newGood);
+                daoShop.deleteByName(good.name);
+                daoShop.save(newGood);
             }
         }
-
         return access_token;
-    }
-
-    public String checkAccount(Account loginPaswword) throws IOException {
-
-        String accessToken;
-
-        Account accountJSON = dao.findLogin(loginPaswword.getName());
-        if (Objects.equals(loginPaswword.getName(), accountJSON.getName()) &&
-                Objects.equals(loginPaswword.getPassword(), accountJSON.getPassword())) {
-
-            String randomNumbers = (String.valueOf(random.doubles()));
-            String passordWithRandom = loginPaswword.getPassword().concat(randomNumbers);
-            accessToken = DigestUtils.sha1Hex(passordWithRandom);
-            accessT.add(accessToken);
-
-            return accessToken;
-
-        } else {
-            throw new IllegalArgumentException("Неверный логин или пароль.");
-        }
     }
 }

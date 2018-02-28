@@ -12,6 +12,7 @@ import static spark.Spark.*;
 
 public class Controller {
     private static ShopService service = new ShopService();
+    private static AccountService serviceAccount = new AccountService();
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(Controller.class);
 
@@ -73,9 +74,7 @@ public class Controller {
             try {
                 String body = request.body();
                 Account login_Password = mapper.readValue(body, Account.class);
-                {
-                }
-                return service.checkAccount(login_Password);
+                return serviceAccount.checkAccount(login_Password);
 
             } catch (JsonParseException | JsonMappingException e) {
                 LOGGER.error(e.getMessage(), e);
