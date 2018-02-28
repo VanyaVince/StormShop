@@ -10,8 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AppService {
-    private static final HttpConnectionService HTTP = new HttpConnectionService();
+public class ShopService {
 
     public void totalSum(Label viewSum, TableView list) {
         List<Good> product = changeList(list);

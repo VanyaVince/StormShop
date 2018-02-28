@@ -24,7 +24,8 @@ import java.util.Objects;
 public class AppClient extends Application {
 
     private static final ObjectMapper mapper = new ObjectMapper();
-    private static final AppService update = new AppService();
+    private static final ShopService update = new ShopService();
+    private static final AdminService rootsPanel = new AdminService();
     private static final HttpConnectionService http = new HttpConnectionService();
     private static List<Good> serverGoods = new ArrayList<>();
 
@@ -98,7 +99,7 @@ public class AppClient extends Application {
         //urlAddress соединение, корневой узел
         connectionUrlAddress.setOnAction(localhost);
         url.setMinWidth(ProportionsConfigs.URL_WIDHT);
-        RootsApp.rootUrlConnection(rootUrlConnection);
+        rootsPanel.rootUrlConnection(rootUrlConnection);
     }
 
     private void setAuthRootPane() {
@@ -106,7 +107,7 @@ public class AppClient extends Application {
         //авторизация, корневой узел
         buttonEnter.setText("Login");
         buttonEnter.setOnAction(authorizationEvent);
-        RootsApp.rootAuthorization(rootAuthorization);
+        rootsPanel.rootAuthorization(rootAuthorization);
     }
 
     private void buyButtons() {
@@ -189,9 +190,9 @@ public class AppClient extends Application {
                 //закрытие окна urlConnection
                 urlAddress.close();
                 //корневой узел buyGoods
-                RootsApp.rootBuyGoods(rootBuyGood);
+                rootsPanel.rootBuyGoods(rootBuyGood);
                 //корневой узел addGoods
-                RootsApp.rootAddGoods(rootAddGood);
+                rootsPanel.rootAddGoods(rootAddGood);
 
             } catch (
                     IOException e) {

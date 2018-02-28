@@ -6,9 +6,9 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 
 
-class RootsApp {
+class AdminService {
 
-    static void rootBuyGoods(FlowPane root) {
+    public void rootBuyGoods(FlowPane root) {
         root.setPadding(new Insets(ProportionsConfigs.PADDING));
         root.setHgap(ProportionsConfigs.ROOT_H_GAP);
         root.setVgap(ProportionsConfigs.ROOT_V_GAP);
@@ -23,7 +23,7 @@ class RootsApp {
         root.getChildren().add(AppClient.getButtonOfBuy());
     }
 
-    static void rootAddGoods(FlowPane root1) {
+    public void rootAddGoods(FlowPane root1) {
         root1.setPadding(new Insets(ProportionsConfigs.PADDING));
         root1.setVgap(ProportionsConfigs.ROOT1_V_GAP);
         root1.setHgap(ProportionsConfigs.ROOT1_H_GAP);
@@ -43,7 +43,7 @@ class RootsApp {
 
     }
 
-    static void rootAuthorization(GridPane root2) {
+    public void rootAuthorization(GridPane root2) {
         root2.setPadding(new Insets(ProportionsConfigs.PADDING));
         root2.setHgap(ProportionsConfigs.ROOT2_H_GAP);
         root2.setVgap(ProportionsConfigs.ROOT2_V_GAP);
@@ -57,7 +57,7 @@ class RootsApp {
         GridPane.setHalignment(AppClient.getButtonEnter(), HPos.RIGHT);
     }
 
-    static void rootUrlConnection(FlowPane root4) {
+    public void rootUrlConnection(FlowPane root4) {
         root4.setPadding(new Insets(ProportionsConfigs.PADDING));
         root4.setHgap(ProportionsConfigs.ROOT4_H_GAP);
         root4.setVgap(ProportionsConfigs.ROOT4_V_GAP);
